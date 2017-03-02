@@ -5,14 +5,20 @@
  */
 package com.bcklzz.doit.business.reminders.boundary;
 
+import com.airhacks.rulz.jaxrsclient.JAXRSClientProvider;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import static org.hamcrest.CoreMatchers.is;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
 
 /**
  *
@@ -20,7 +26,8 @@ import static org.junit.Assert.*;
  */
 public class TodosResourceIT {
 
-    private Client client;
+    @Rule
+    public JAXRSClientProvider provider = JAXRSClientProvider.buildWithURI("http://localhost:8080/doit/api/todos");
     
     
     public TodosResourceIT() {
@@ -37,8 +44,6 @@ public class TodosResourceIT {
     @Before
     public void setUp() {
         
-        client = ClientBuilder.newClient();
-        
     }
     
     @After
@@ -48,6 +53,14 @@ public class TodosResourceIT {
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-    // @Test
-    // public void hello() {}
+    @Test
+    public void fetchTodos() {
+        Response response = this.provider.target().request(MediaType.APPLICATION_JSON).get();
+        
+        assertThat(response.getStatus(), is(200));
+        
+        String payload = response.readEntity(String.class);
+        
+        assertTrue(payload.startsWith("Hello"));
+    }
 }
