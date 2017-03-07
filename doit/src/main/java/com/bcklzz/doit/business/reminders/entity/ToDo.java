@@ -26,5 +26,10 @@ public class ToDo {
     public ToDo() {
     }
     
+    @Override
+    public String toString(){
+         return caption +"," + description+ "," + priority;
+    }
+    
     
 }

@@ -6,8 +6,12 @@
 package com.bcklzz.doit.business.reminders.boundary;
 
 import com.airhacks.rulz.jaxrsclient.JAXRSClientProvider;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -59,8 +63,32 @@ public class TodosResourceIT {
         
         assertThat(response.getStatus(), is(200));
         
-        String payload = response.readEntity(String.class);
+        JsonArray allTodos = response.readEntity(JsonArray.class);
+        System.out.println("Payload: "+allTodos);
+        assertFalse(allTodos.isEmpty());
         
-        assertTrue(payload.startsWith("Hello"));
+        
+        String xml =    "<toDo>\n" +
+                          "<caption>From test</caption>\n" +
+                          "<description>...</description>\n" +
+                          "<priority>100</priority>\n" +
+                        "</toDo>\n";
+        Response post = this.provider.target().request(MediaType.APPLICATION_XML).post(Entity.xml(xml));
+        assertThat(post.getStatus(), is(204));
+        
+        JsonObject todo = allTodos.getJsonObject(0);
+        assertTrue(todo.getString("caption").startsWith("implement"));
+        
+        JsonObject dedicatedTodo = this.provider.target()
+                .path("42")
+                .request(MediaType.APPLICATION_JSON)
+                .get(JsonObject.class);
+        
+        assertTrue(dedicatedTodo.getString("caption").contains("42"));
+        
+        Response delete = this.provider.target().path("42").request(MediaType.APPLICATION_JSON).delete();
+        assertThat(delete.getStatus(), is(204));
+        
+        
     }
 }
