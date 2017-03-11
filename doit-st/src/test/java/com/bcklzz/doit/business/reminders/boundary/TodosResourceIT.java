@@ -53,12 +53,22 @@ public class TodosResourceIT {
     @After
     public void tearDown() {
     }
-
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
+    
+    
     @Test
-    public void fetchTodos() {
+    public void post(){
+        String xml = "<toDo>\n" +
+                         "<caption>implement</caption>\n" +
+                         "<description>...</description>\n" +
+                         "<priority>100</priority>\n" +
+                      "</toDo>\n";
+        Response post = this.provider.target().request(MediaType.APPLICATION_XML).post(Entity.xml(xml));
+        assertThat(post.getStatus(), is(204));
+    }
+
+    @Test
+    public void fetchAll() {
+       
         Response response = this.provider.target().request(MediaType.APPLICATION_JSON).get();
         
         assertThat(response.getStatus(), is(200));
@@ -66,29 +76,26 @@ public class TodosResourceIT {
         JsonArray allTodos = response.readEntity(JsonArray.class);
         System.out.println("Payload: "+allTodos);
         assertFalse(allTodos.isEmpty());
-        
-        
-        String xml =    "<toDo>\n" +
-                          "<caption>From test</caption>\n" +
-                          "<description>...</description>\n" +
-                          "<priority>100</priority>\n" +
-                        "</toDo>\n";
-        Response post = this.provider.target().request(MediaType.APPLICATION_XML).post(Entity.xml(xml));
-        assertThat(post.getStatus(), is(204));
-        
         JsonObject todo = allTodos.getJsonObject(0);
         assertTrue(todo.getString("caption").startsWith("implement"));
-        
+    }
+    
+    @Test
+    public void fetchOne(){
+
         JsonObject dedicatedTodo = this.provider.target()
-                .path("42")
-                .request(MediaType.APPLICATION_JSON)
-                .get(JsonObject.class);
+                                   .path("42")
+                                   .request(MediaType.APPLICATION_JSON)
+                                   .get(JsonObject.class);
         
         assertTrue(dedicatedTodo.getString("caption").contains("42"));
-        
+    }
+    
+    @Test
+    public void delete(){
         Response delete = this.provider.target().path("42").request(MediaType.APPLICATION_JSON).delete();
         assertThat(delete.getStatus(), is(204));
-        
-        
     }
+    
+
 }

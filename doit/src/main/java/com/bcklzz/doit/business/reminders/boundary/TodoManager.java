@@ -4,6 +4,8 @@ import com.bcklzz.doit.business.reminders.entity.ToDo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 /**
  *
@@ -13,22 +15,25 @@ import javax.ejb.Stateless;
 @Stateless
 public class TodoManager {
 
+    
+    @PersistenceContext
+    EntityManager em;
+    
     public ToDo findById(long id) {
-        return new ToDo("implement REST endpoint "+id, "...", 100);
+        return em.find(ToDo.class, id);
     }
 
     public void delete(long id) {
-        System.out.println("Deleted todo "+id);
+        ToDo reference = em.getReference(ToDo.class, id);
+        em.remove(reference);
     }
 
     public List<ToDo> all() {
-        List<ToDo> allTodos = new ArrayList<>();
-        allTodos.add(findById(42));
-        return allTodos;
+        return em.createNamedQuery(ToDo.findAll, ToDo.class).getResultList();
     }
 
     public void save(ToDo todo) {
-        System.out.println("Saving todo: "+todo.toString());
+        em.merge(todo);
     }
 
     
