@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 
 /**
@@ -24,16 +25,21 @@ public class TodoManager {
     }
 
     public void delete(long id) {
-        ToDo reference = em.getReference(ToDo.class, id);
-        em.remove(reference);
+        try{
+            ToDo reference = em.getReference(ToDo.class, id);
+            em.remove(reference);
+        }catch(EntityNotFoundException ex){
+            //We want to delete the entity
+        }
+        
     }
 
     public List<ToDo> all() {
         return em.createNamedQuery(ToDo.findAll, ToDo.class).getResultList();
     }
 
-    public void save(ToDo todo) {
-        em.merge(todo);
+    public ToDo save(ToDo todo) {
+        return em.merge(todo);
     }
 
     

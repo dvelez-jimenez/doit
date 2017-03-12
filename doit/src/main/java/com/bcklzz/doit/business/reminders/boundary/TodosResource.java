@@ -1,6 +1,7 @@
 package com.bcklzz.doit.business.reminders.boundary;
 
 import com.bcklzz.doit.business.reminders.entity.ToDo;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -11,7 +12,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 /**
  *
@@ -37,9 +42,10 @@ public class TodosResource {
     } 
     
     @POST
-    public void save(ToDo todo){
-        this.manager.save(todo);
-        
+    public Response save(ToDo todo, @Context UriInfo info){
+        ToDo saved = this.manager.save(todo);
+        URI uri = info.getAbsolutePathBuilder().path("{id}").build(saved.getId());        
+        return Response.created(uri).build();
     }
     
     

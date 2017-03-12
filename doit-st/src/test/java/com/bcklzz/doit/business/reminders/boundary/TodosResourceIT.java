@@ -56,14 +56,23 @@ public class TodosResourceIT {
     
     
     @Test
-    public void post(){
-        String xml = "<toDo>\n" +
+    public void postAndFetch(){
+        String xml = "<todo>\n" +
                          "<caption>implement</caption>\n" +
                          "<description>...</description>\n" +
                          "<priority>100</priority>\n" +
-                      "</toDo>\n";
+                      "</todo>\n";
         Response post = this.provider.target().request(MediaType.APPLICATION_XML).post(Entity.xml(xml));
-        assertThat(post.getStatus(), is(204));
+        String location = post.getHeaderString("Location");
+        System.out.println("Location: "+location);
+        assertThat(post.getStatus(), is(201));
+        
+        JsonObject dedicatedTodo = this.provider.target(location)
+                                   .request(MediaType.APPLICATION_JSON)
+                                   .get(JsonObject.class);
+        
+        assertTrue(dedicatedTodo.getString("caption").contains("implement"));
+        
     }
 
     @Test
@@ -79,18 +88,7 @@ public class TodosResourceIT {
         JsonObject todo = allTodos.getJsonObject(0);
         assertTrue(todo.getString("caption").startsWith("implement"));
     }
-    
-    @Test
-    public void fetchOne(){
-
-        JsonObject dedicatedTodo = this.provider.target()
-                                   .path("42")
-                                   .request(MediaType.APPLICATION_JSON)
-                                   .get(JsonObject.class);
         
-        assertTrue(dedicatedTodo.getString("caption").contains("42"));
-    }
-    
     @Test
     public void delete(){
         Response delete = this.provider.target().path("42").request(MediaType.APPLICATION_JSON).delete();

@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @NamedQuery(name=ToDo.findAll, query="SELECT t FROM ToDo t")
-@XmlRootElement
+@XmlRootElement(name = "todo")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ToDo {
     
@@ -42,5 +42,20 @@ public class ToDo {
          return caption +"," + description+ "," + priority;
     }
     
+    public long getId() {
+        return id;
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
     
 }
