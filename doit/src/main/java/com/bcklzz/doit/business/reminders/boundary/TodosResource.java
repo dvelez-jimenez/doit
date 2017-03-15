@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -53,5 +54,13 @@ public class TodosResource {
     @Path("{id}")
     public void delete(@PathParam("id") long id){
         this.manager.delete(id);
+    }
+    
+    
+    @PUT
+    @Path("{id}")
+    public void put(@PathParam("id") long id, ToDo todo){
+        todo.setId(id);
+        this.manager.save(todo);
     }
 }

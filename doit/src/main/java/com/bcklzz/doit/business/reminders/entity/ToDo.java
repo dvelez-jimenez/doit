@@ -57,5 +57,24 @@ public class ToDo {
     public int getPriority() {
         return priority;
     }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+    
+    
+    
     
 }

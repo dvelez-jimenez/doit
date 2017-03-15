@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.bcklzz.doit.business.reminders.boundary.TodosResourceIT
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.948 sec
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.721 sec

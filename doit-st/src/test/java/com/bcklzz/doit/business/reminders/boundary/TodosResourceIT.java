@@ -6,8 +6,11 @@
 package com.bcklzz.doit.business.reminders.boundary;
 
 import com.airhacks.rulz.jaxrsclient.JAXRSClientProvider;
+import java.math.BigDecimal;
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -56,28 +59,44 @@ public class TodosResourceIT {
     
     
     @Test
-    public void postAndFetch(){
-        String xml = "<todo>\n" +
-                         "<caption>implement</caption>\n" +
-                         "<description>...</description>\n" +
-                         "<priority>100</priority>\n" +
-                      "</todo>\n";
-        Response post = this.provider.target().request(MediaType.APPLICATION_XML).post(Entity.xml(xml));
+    public void crud(){
+        //create
+        JsonObjectBuilder todoBuilder = Json.createObjectBuilder();
+        JsonObject todoToCreate = todoBuilder
+                                         .add("caption", "implement")
+                                         .add("description", "...")
+                                         .add("priority", 42)
+                                         .build();
+        
+        Response post = this.provider.target().request(MediaType.APPLICATION_JSON).post(Entity.json(todoToCreate));
         String location = post.getHeaderString("Location");
         System.out.println("Location: "+location);
         assertThat(post.getStatus(), is(201));
         
+        //read
         JsonObject dedicatedTodo = this.provider.target(location)
                                    .request(MediaType.APPLICATION_JSON)
                                    .get(JsonObject.class);
         
         assertTrue(dedicatedTodo.getString("caption").contains("implement"));
         
-    }
-
-    @Test
-    public void fetchAll() {
+        //update
+        JsonObjectBuilder updateBuilder = Json.createObjectBuilder();
+        JsonObject todoToUpdate = updateBuilder
+                                         .add("caption", "implemented")
+                                         .build();
+        Response put = this.provider.target(location).request(MediaType.APPLICATION_JSON).put(Entity.json(todoToUpdate));
+        //String location = put.getHeaderString("Location");
+        assertThat(put.getStatus(), is(204));
+        
+        JsonObject updatedTodo = this.provider.target(location)
+                                 .request(MediaType.APPLICATION_JSON)
+                                 .get(JsonObject.class);
+        
+        assertTrue(updatedTodo.getString("caption").contains("implemented"));
        
+        
+        //readAll
         Response response = this.provider.target().request(MediaType.APPLICATION_JSON).get();
         
         assertThat(response.getStatus(), is(200));
@@ -87,13 +106,11 @@ public class TodosResourceIT {
         assertFalse(allTodos.isEmpty());
         JsonObject todo = allTodos.getJsonObject(0);
         assertTrue(todo.getString("caption").startsWith("implement"));
-    }
         
-    @Test
-    public void delete(){
-        Response delete = this.provider.target().path("42").request(MediaType.APPLICATION_JSON).delete();
+        
+        
+        //delete
+        Response delete = this.provider.target(location).request(MediaType.APPLICATION_JSON).delete();
         assertThat(delete.getStatus(), is(204));
     }
-    
-
 }
