@@ -32,17 +32,16 @@ public class TodosResource {
     @Inject
     TodoManager manager;
     
+    @Path("{id}")
+    public TodoResource getTodoResource(@PathParam("id") long id){
+        return new TodoResource(id, manager);
+    }
+    
     @GET
     public List<ToDo> all(){
         return this.manager.all();
     }
-    
-    @GET
-    @Path("{id}")
-    public ToDo find(@PathParam("id") long id){
-        return this.manager.findById(id);
-    } 
-    
+      
     @POST
     public Response save(ToDo todo, @Context UriInfo info){
         ToDo saved = this.manager.save(todo);
@@ -50,36 +49,4 @@ public class TodosResource {
         return Response.created(uri).build();
     }
     
-    
-    @DELETE
-    @Path("{id}")
-    public void delete(@PathParam("id") long id){
-        this.manager.delete(id);
-    }
-    
-    
-    @PUT
-    @Path("{id}")
-    public void put(@PathParam("id") long id, ToDo todo){
-        todo.setId(id);
-        this.manager.save(todo);
-    }
-    
-    
-    @PUT
-    @Path("{id}/status")
-    public Response put(@PathParam("id") long id, JsonObject status, @Context UriInfo info){
-        
-        if(!status.containsKey("done")){
-            return Response.status(Response.Status.BAD_REQUEST).header("reason", "request should contain done field").build();
-        }
-        boolean done = status.getBoolean("done");
-        
-        ToDo todo = this.manager.updateStatus(id, done);
-        if(todo == null){
-            return Response.status(Response.Status.BAD_REQUEST).header("reason", "Todo with id "+id+" does not exist").build();
-        }else{
-            return Response.status(Response.Status.OK).entity(todo).build();
-        }
-    }
 }
