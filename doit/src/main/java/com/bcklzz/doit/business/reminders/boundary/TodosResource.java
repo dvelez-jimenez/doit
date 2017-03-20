@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -62,5 +63,23 @@ public class TodosResource {
     public void put(@PathParam("id") long id, ToDo todo){
         todo.setId(id);
         this.manager.save(todo);
+    }
+    
+    
+    @PUT
+    @Path("{id}/status")
+    public Response put(@PathParam("id") long id, JsonObject status, @Context UriInfo info){
+        
+        if(!status.containsKey("done")){
+            return Response.status(Response.Status.BAD_REQUEST).header("reason", "request should contain done field").build();
+        }
+        boolean done = status.getBoolean("done");
+        
+        ToDo todo = this.manager.updateStatus(id, done);
+        if(todo == null){
+            return Response.status(Response.Status.BAD_REQUEST).header("reason", "Todo with id "+id+" does not exist").build();
+        }else{
+            return Response.status(Response.Status.OK).entity(todo).build();
+        }
     }
 }

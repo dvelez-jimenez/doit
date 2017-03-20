@@ -96,6 +96,45 @@ public class TodosResourceIT {
         assertTrue(updatedTodo.getString("caption").contains("implemented"));
        
         
+         //update status
+        JsonObjectBuilder updateStatusBuilder = Json.createObjectBuilder();
+        JsonObject todoToUpdateStatus = updateStatusBuilder
+                                         .add("done", true)
+                                         .build();
+        Response statusUpdate = this.provider.target(location).path("status").request(MediaType.APPLICATION_JSON).put(Entity.json(todoToUpdateStatus));
+        //String location = put.getHeaderString("Location");
+        assertThat(statusUpdate.getStatus(), is(200));
+        
+        JsonObject updatedStatusTodo = this.provider.target(location)
+                                       .request(MediaType.APPLICATION_JSON)
+                                       .get(JsonObject.class);
+        
+        assertTrue(updatedStatusTodo.getBoolean("done"));
+        
+        
+        
+         //update status no existint
+        JsonObjectBuilder updateNoExistingStatusBuilder = Json.createObjectBuilder();
+        todoToUpdateStatus = updateNoExistingStatusBuilder
+                                         .add("done", true)
+                                         .build();
+        statusUpdate = this.provider.target().path("-42").path("status").request(MediaType.APPLICATION_JSON).put(Entity.json(todoToUpdateStatus));
+        //String location = put.getHeaderString("Location");
+        assertThat(statusUpdate.getStatus(), is(400));
+        
+        
+        
+        //update bad request
+        updateStatusBuilder = Json.createObjectBuilder();
+        todoToUpdateStatus = updateStatusBuilder
+                                               .add("wrong", true)
+                                               .build();
+        statusUpdate = this.provider.target(location).path("status").request(MediaType.APPLICATION_JSON).put(Entity.json(todoToUpdateStatus));
+        //String location = put.getHeaderString("Location");
+        assertThat(statusUpdate.getStatus(), is(400));
+        
+        
+        
         //readAll
         Response response = this.provider.target().request(MediaType.APPLICATION_JSON).get();
         

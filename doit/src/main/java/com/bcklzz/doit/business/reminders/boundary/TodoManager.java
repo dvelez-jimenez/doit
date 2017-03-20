@@ -42,5 +42,13 @@ public class TodoManager {
         return em.merge(todo);
     }
 
+    public ToDo updateStatus(long id, boolean done) {
+        ToDo todo = this.findById(id);
+        if(todo != null){
+            todo.setDone(done);
+        }
+        return todo;
+    }
+
     
 }
