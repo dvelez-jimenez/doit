@@ -11,6 +11,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -78,14 +79,12 @@ public class TodosResourceIT {
                                    .request(MediaType.APPLICATION_JSON)
                                    .get(JsonObject.class);
         
+        System.out.println("dedicatedTodo: "+dedicatedTodo);
         assertTrue(dedicatedTodo.getString("caption").contains("implement"));
         
         //update
-        JsonObjectBuilder updateBuilder = Json.createObjectBuilder();
-        JsonObject todoToUpdate = updateBuilder
-                                         .add("caption", "implemented")
-                                         .build();
-        Response put = this.provider.target(location).request(MediaType.APPLICATION_JSON).put(Entity.json(todoToUpdate));
+        dedicatedTodo = Json.createObjectBuilder().add("caption", "implemented").add("version", dedicatedTodo.getInt("version")).build();
+        Response put = this.provider.target(location).request(MediaType.APPLICATION_JSON).put(Entity.json(dedicatedTodo));
         //String location = put.getHeaderString("Location");
         assertThat(put.getStatus(), is(204));
         
@@ -94,6 +93,20 @@ public class TodosResourceIT {
                                  .get(JsonObject.class);
         
         assertTrue(updatedTodo.getString("caption").contains("implemented"));
+        
+        //update again
+        JsonObjectBuilder updateBuilder = Json.createObjectBuilder();
+        JsonObject todoToUpdate = updateBuilder.add("caption", "implemented again").build();
+        Response updated = this.provider.target(location).request(MediaType.APPLICATION_JSON).put(Entity.json(todoToUpdate));
+        //String location = put.getHeaderString("Location");
+        assertThat(updated.getStatus(), is(409));
+        String header = updated.getHeaderString("cause");
+        assertNotNull(header);
+        System.out.println("Header: "+header);
+        /*JsonObject updatedTodo = this.provider.target(location)
+        .request(MediaType.APPLICATION_JSON)
+        .get(JsonObject.class);*/
+        //assertTrue(updatedTodo.getString("caption").contains("implemented"));
        
         
          //update status
@@ -143,13 +156,61 @@ public class TodosResourceIT {
         JsonArray allTodos = response.readEntity(JsonArray.class);
         System.out.println("Payload: "+allTodos);
         assertFalse(allTodos.isEmpty());
-        JsonObject todo = allTodos.getJsonObject(0);
-        assertTrue(todo.getString("caption").startsWith("implement"));
-        
-        
         
         //delete
         Response delete = this.provider.target(location).request(MediaType.APPLICATION_JSON).delete();
         assertThat(delete.getStatus(), is(204));
+    }
+    
+    
+    
+    @Test
+    public void createToDoWithoutCaption(){
+        //create
+        JsonObjectBuilder todoBuilder = Json.createObjectBuilder();
+        JsonObject todoToCreate = todoBuilder
+                                         .add("description", "...")
+                                         .add("priority", 42)
+                                         .build();
+        
+        Response post = this.provider.target().request(MediaType.APPLICATION_JSON).post(Entity.json(todoToCreate));
+        String location = post.getHeaderString("Location");
+        System.out.println("Location: "+location);
+        post.getHeaders().entrySet().forEach(System.out::println);
+        assertThat(post.getStatus(), is(400));
+    }
+    
+    @Test
+    public void createValidToDo(){
+        //create
+        JsonObjectBuilder todoBuilder = Json.createObjectBuilder();
+        JsonObject todoToCreate = todoBuilder
+                                         .add("caption", "...")
+                                         .add("description", "...")
+                                         .add("priority", 42)
+                                         .build();
+        
+        Response post = this.provider.target().request(MediaType.APPLICATION_JSON).post(Entity.json(todoToCreate));
+        String location = post.getHeaderString("Location");
+        System.out.println("Location: "+location);
+        post.getHeaders().entrySet().forEach(System.out::println);
+        assertThat(post.getStatus(), is(201));
+    }
+    
+    @Test
+    public void createTodoHightPriorityNoDescription(){
+        //create
+        JsonObjectBuilder todoBuilder = Json.createObjectBuilder();
+        JsonObject todoToCreate = todoBuilder
+                                         .add("caption", "...")
+                                         .add("priority", 42)
+                                         .build();
+        
+        Response post = this.provider.target().request(MediaType.APPLICATION_JSON).post(Entity.json(todoToCreate));
+        String location = post.getHeaderString("Location");
+        System.out.println("Location: "+location);
+        post.getHeaders().entrySet().forEach(System.out::println);
+        assertThat(post.getStatus(), is(400));
+        
     }
 }

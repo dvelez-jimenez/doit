@@ -1,9 +1,11 @@
  package com.bcklzz.doit.business.reminders.boundary;
 
+import com.bcklzz.doit.business.logging.boundary.BoundaryLogger;
 import com.bcklzz.doit.business.reminders.entity.ToDo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
@@ -14,6 +16,7 @@ import javax.persistence.PersistenceContext;
  */
 
 @Stateless
+@Interceptors(BoundaryLogger.class)
 public class TodoManager {
 
     
